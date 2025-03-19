@@ -34,26 +34,22 @@ func TestAddGetDelete(t *testing.T) {
     parcel := getTestParcel()
 
     number, err := store.Add(parcel)
-    if err != nil {
         require.NoError(t, err)
-    }
-    assert.NotEmpty(t, number)
+
 
     addedParcel, err := store.Get(number)
-    if err != nil {
         require.NoError(t, err)
-    }
 
-    assert.EqualValues(t, parcel.Client, addedParcel.Client)
-    assert.EqualValues(t, parcel.Status, addedParcel.Status)
-    assert.EqualValues(t, parcel.Address, addedParcel.Address)
-    assert.EqualValues(t, parcel.CreatedAt, addedParcel.CreatedAt)
+    assert.Equal(t, parcel.Client, addedParcel.Client)
+    assert.Equal(t, parcel.Status, addedParcel.Status)
+    assert.Equal(t, parcel.Address, addedParcel.Address)
+    assert.Equal(t, parcel.CreatedAt, addedParcel.CreatedAt)
 
     err = store.Delete(number)
     require.NoError(t, err)
 
     _, err = store.Get(number)
-    require.Equal(t, sql.ErrNoRows, err)
+    require.ErrorIs(t, sql.ErrNoRows, err)
 }
 
 func TestSetAddress(t *testing.T) {
@@ -100,10 +96,7 @@ func TestSetStatus(t *testing.T) {
 
 func TestGetByClient(t *testing.T) {
 	db, err := sql.Open("sqlite", "tracker.db")
-    if err != nil {
         require.NoError(t, err)
-    }
-    defer db.Close()
 
     store := NewParcelStore(db)
 
@@ -134,7 +127,7 @@ func TestGetByClient(t *testing.T) {
 	assert.Len(t, parcels, len(storedParcels))
 
 	for _, parcel := range storedParcels {
-		assert.NotEmpty(t, parcelMap[parcel.Number])
+		assert.Contains(t, parcelMap, parcel.Number)
 		assert.Equal(t, parcel, parcelMap[parcel.Number])
 	}
 }
